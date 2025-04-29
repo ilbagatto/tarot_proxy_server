@@ -38,6 +38,9 @@ jobs:
         with:
           sdk: '3.7.2'
 
+      - name: Install dependencies
+        run: dart pub get
+
       - name: Compile executable
         run: dart compile exe bin/main.dart -o tarot_proxy_server
 
