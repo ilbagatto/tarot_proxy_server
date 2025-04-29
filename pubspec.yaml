@@ -5,6 +5,7 @@ description: >
   while enabling safe access from the browser via CORS.
 version: 1.0.0
 repository: https://github.com/ilbagatto/tarot_proxy_server.git
+publish_to: 'none'
 
 environment:
   sdk: ^3.7.2
