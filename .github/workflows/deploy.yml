@@ -55,39 +55,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
 
+
     steps:
-      - name: Download binary artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tarot-proxy-binary
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Upload files to VPS
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: |
-            tarot_proxy_server
-            deploy/tarot-proxy.service
-            deploy/.env.example
-          target: ${{ vars.SERVER_PATH }}/
+    - name: Download binary artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: tarot-proxy-binary
 
-      - name: Setup server files if missing
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            if [ ! -f  ${{ vars.SERVER_PATH }}/tarot-proxy.service ]; then
-              echo "Missing tarot-proxy.service!"
-            fi
-            if [ ! -f /opt/tarot_proxy_server/.env ]; then
-              echo "Creating default .env from .env.example"
-              cp ${{ vars.SERVER_PATH }}/.env.example /opt/tarot_proxy_server/.env
-            fi
-
+    - name: Upload binary to server
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: tarot_proxy_server
+        target: ${{ vars.SERVER_PATH }}/
+            
   restart:
     name: 🔄 Restart Service (Optional)
     needs: [upload]
