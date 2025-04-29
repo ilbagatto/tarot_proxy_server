@@ -5,10 +5,10 @@ After=network.target
 [Service]
 Type=simple
 User=proxy
-WorkingDirectory=/opt/tarot_proxy_server
-ExecStart=/opt/tarot_proxy_server/tarot_proxy_server
+WorkingDirectory=/opt/tarot-proxy-server
+ExecStart=/opt/tarot-proxy-server/tarot_proxy_server
 Restart=on-failure
-EnvironmentFile=/opt/tarot_proxy_server/.env
+EnvironmentFile=/opt/tarot-proxy-server/.env
 
 [Install]
 WantedBy=multi-user.target
