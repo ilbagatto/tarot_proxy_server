@@ -1,0 +1,14 @@
+[Unit]
+Description=Tarot Proxy Server
+After=network.target
+
+[Service]
+Type=simple
+User=proxy
+WorkingDirectory=/opt/tarot_proxy_server
+ExecStart=/opt/tarot_proxy_server/tarot_proxy_server
+Restart=on-failure
+EnvironmentFile=/opt/tarot_proxy_server/.env
+
+[Install]
+WantedBy=multi-user.target

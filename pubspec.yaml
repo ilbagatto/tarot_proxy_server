@@ -1,5 +1,8 @@
 name: tarot_proxy_server
-description: A minimal Dart proxy server for securely exposing Tarot API to Telegram MiniApps via HTTPS with authentication and CORS support.
+description: >
+  A lightweight and secure proxy server written in Dart.
+  Designed for the Tarot MiniApp to relay API requests with Basic Auth,
+  while enabling safe access from the browser via CORS.
 version: 1.0.0
 repository: https://github.com/ilbagatto/tarot_proxy_server.git
 

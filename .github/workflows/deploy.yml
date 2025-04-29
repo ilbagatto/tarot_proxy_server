@@ -1,0 +1,102 @@
+name: Deploy Tarot Proxy Server
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'      
+
+jobs:
+  unit-test:
+    name: ✅ Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.7.2'
+
+      - name: Run tests
+        run: dart test
+
+  build:
+    name: ⚒️ Build Binary
+    runs-on: ubuntu-latest
+    needs: unit-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.7.2'
+
+      - name: Compile executable
+        run: dart compile exe bin/main.dart -o tarot_proxy_server
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tarot-proxy-binary
+          path: tarot_proxy_server
+
+  upload:
+    name: 🚚 Upload to Server
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tarot-proxy-binary
+
+      - name: Upload files to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: |
+            tarot_proxy_server
+            deploy/tarot-proxy.service
+            deploy/.env.example
+          target: ${{ vars.SERVER_PATH }}/
+
+      - name: Setup server files if missing
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if [ ! -f  ${{ vars.SERVER_PATH }}/tarot-proxy.service ]; then
+              echo "Missing tarot-proxy.service!"
+            fi
+            if [ ! -f /opt/tarot_proxy_server/.env ]; then
+              echo "Creating default .env from .env.example"
+              cp ${{ vars.SERVER_PATH }}/.env.example /opt/tarot_proxy_server/.env
+            fi
+
+  restart:
+    name: 🔄 Restart Service (Optional)
+    needs: [upload]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restart systemd service
+        if: ${{ vars.RESTART_SERVICE == 'true' }}
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "🔁 Restarting tarot-proxy systemd service"
+            sudo systemctl restart tarot-proxy.service
