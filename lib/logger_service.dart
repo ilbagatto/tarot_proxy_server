@@ -15,9 +15,18 @@ class SimpleLogPrinter extends LogPrinter {
   }
 }
 
+class MyFilter extends LogFilter {
+  @override
+  bool shouldLog(LogEvent event) {
+    return true;
+  }
+}
+
 final logger = Logger(
+  filter: MyFilter(),
   level: Level.debug,
   //level: isProduction ? Level.warning : Level.debug,
   printer: SimpleLogPrinter(),
   output: ConsoleOutput(),
 );
+
