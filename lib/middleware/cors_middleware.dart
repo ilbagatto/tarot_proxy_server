@@ -19,7 +19,17 @@ Middleware corsMiddleware() {
         logger.d('Origin header: $origin');
         logger.d('Is allowed: $isAllowedOrigin');
         logger.d('Final headers: $headers');
-        return Response(204, headers: headers); // No Content
+
+        final optionsHeaders = {
+          ...headers,
+          'Content-Length': '0',
+        };
+
+        return Response(
+          204,
+          headers: optionsHeaders,
+          context: {'shelf.io.buffer_output': false},
+        );
       }
 
       final response = await innerHandler(request);
