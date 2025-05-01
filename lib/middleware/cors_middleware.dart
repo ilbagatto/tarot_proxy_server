@@ -11,6 +11,7 @@ Middleware corsMiddleware() {
       final headers = {
         ..._baseCorsHeaders,
         if (isAllowedOrigin) 'Access-Control-Allow-Origin': origin,
+        if (isAllowedOrigin) 'Vary': 'Origin',
       };
 
       if (request.method == 'OPTIONS') {
