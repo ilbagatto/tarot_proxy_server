@@ -19,4 +19,5 @@ final logger = Logger(
   level: Level.debug,
   //level: isProduction ? Level.warning : Level.debug,
   printer: SimpleLogPrinter(),
+  output: ConsoleOutput(),
 );
