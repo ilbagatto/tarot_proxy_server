@@ -9,6 +9,8 @@ WorkingDirectory=/opt/tarot-proxy-server
 ExecStart=/opt/tarot-proxy-server/tarot_proxy_server
 Restart=on-failure
 EnvironmentFile=/opt/tarot-proxy-server/.env
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
