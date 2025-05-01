@@ -16,6 +16,7 @@ class SimpleLogPrinter extends LogPrinter {
 }
 
 final logger = Logger(
-  level: isProduction ? Level.warning : Level.debug,
+  level: Level.debug,
+  //level: isProduction ? Level.warning : Level.debug,
   printer: SimpleLogPrinter(),
 );

@@ -1,4 +1,5 @@
 import 'package:shelf/shelf.dart';
+import 'package:tarot_proxy_server/logger_service.dart';
 
 Middleware corsMiddleware() {
   return (innerHandler) {
@@ -13,6 +14,10 @@ Middleware corsMiddleware() {
       };
 
       if (request.method == 'OPTIONS') {
+        logger.d('--- CORS DEBUG ---');
+        logger.d('Origin header: $origin');
+        logger.d('Is allowed: $isAllowedOrigin');
+        logger.d('Final headers: $headers');
         return Response(204, headers: headers); // No Content
       }
 
