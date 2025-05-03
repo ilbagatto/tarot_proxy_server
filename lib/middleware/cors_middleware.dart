@@ -4,30 +4,38 @@ import 'package:tarot_proxy_server/logger_service.dart';
 Middleware corsMiddleware() {
   return (innerHandler) {
     return (request) async {
-      final origin = request.headers['origin'];
-      final isAllowedOrigin =
-          origin != null && _allowedOrigins.contains(origin);
+      final originHeader = request.headers['origin'];
+      final uri = originHeader != null ? Uri.tryParse(originHeader) : null;
+
+      // SDtatic white list for production
+      const allowedStatic = {
+        'https://app.tarot-book.ru',
+      };
+
+      // Dynamic resolving of localhost
+      final isLocalhost = uri != null &&
+        (uri.host == 'localhost' || uri.host == '127.0.0.1');
+
+      final isAllowedOrigin = originHeader != null &&
+        (allowedStatic.contains(originHeader) || isLocalhost);
 
       final headers = {
         ..._baseCorsHeaders,
-        if (isAllowedOrigin) 'Access-Control-Allow-Origin': origin,
+        if (isAllowedOrigin) 'Access-Control-Allow-Origin': originHeader!,
         if (isAllowedOrigin) 'Vary': 'Origin',
       };
 
       if (request.method == 'OPTIONS') {
         logger.d('--- CORS DEBUG ---');
-        logger.d('Origin header: $origin');
-        logger.d('Is allowed: $isAllowedOrigin');
-        logger.d('Final headers: $headers');
-
-        final optionsHeaders = {
-          ...headers,
-          'Content-Length': '0',
-        };
+        logger.d('Origin: $originHeader, allowed? $isAllowedOrigin');
+        logger.d('Response headers: $headers');
 
         return Response(
           204,
-          headers: optionsHeaders,
+          headers: {
+            ...headers,
+            'Content-Length': '0',
+          },
           context: {'shelf.io.buffer_output': false},
         );
       }
@@ -37,12 +45,6 @@ Middleware corsMiddleware() {
     };
   };
 }
-
-const _allowedOrigins = {
-  'https://app.tarot-book.ru',
-  'http://localhost:5173', // for Vite/Flutter Web
-  'http://localhost:12345', // standard Flutter dev server
-};
 
 const _baseCorsHeaders = {
   'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
